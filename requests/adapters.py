@@ -23,6 +23,7 @@ from .utils import (DEFAULT_CA_BUNDLE_PATH, get_encoding_from_headers,
 from .structures import CaseInsensitiveDict
 from .packages.urllib3.exceptions import ClosedPoolError
 from .packages.urllib3.exceptions import ConnectTimeoutError
+from .uploadstream import UploadStream
 from .packages.urllib3.exceptions import HTTPError as _HTTPError
 from .packages.urllib3.exceptions import MaxRetryError
 from .packages.urllib3.exceptions import NewConnectionError
@@ -325,6 +326,10 @@ class HTTPAdapter(BaseAdapter):
                                                              password)
 
         return headers
+
+    def get_upload_stream(self, request, timeout=None, verify=True, cert=None, proxies=None, assertHostName=None):
+        return UploadStream(self, request, timeout=timeout, verify=verify, cert=cert, proxies=proxies,
+                            assertHostName=assertHostName)
 
     def send(self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None, assertHostName=None):
         """Sends PreparedRequest object. Returns Response object.
