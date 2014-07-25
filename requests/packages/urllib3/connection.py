@@ -6,6 +6,7 @@ import socket
 from socket import error as SocketError, timeout as SocketTimeout
 import warnings
 from .packages import six
+import errno
 
 try:  # Python 3
     from http.client import HTTPConnection as _HTTPConnection
@@ -214,7 +215,16 @@ class VerifiedHTTPSConnection(HTTPSConnection):
 
     def connect(self):
         # Add certificate verification
-        conn = self._new_conn()
+        retryAttempted = 0
+        while True:
+            try:
+                conn = self._new_conn()
+                break
+            except socket.error as sockerr:
+                if sockerr.errno == errno.EINTR and retryAttempted < 10:
+                    retryAttempted += 1
+                    continue
+                raise
 
         resolved_cert_reqs = resolve_cert_reqs(self.cert_reqs)
         resolved_ssl_version = resolve_ssl_version(self.ssl_version)
