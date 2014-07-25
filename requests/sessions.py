@@ -464,6 +464,61 @@ class Session(SessionRedirectMixin):
 
         return resp
 
+    def get_upload_stream(self, method, url,
+                          params = None,
+                          headers = None,
+                          auth = None,
+                          timeout = None,
+                          proxies = None,
+                          verify = None,
+                          cert = None,
+                          assertHostName=None,
+                          data=None):
+        # Create the Request.
+        req = Request(
+            method = method.upper(),
+            url = url,
+            headers = headers,
+            params = params or {},
+            auth = auth,
+            data=data
+        )
+        prep = self.prepare_request(req)
+
+        proxies = proxies or {}
+
+        # Gather clues from the surrounding environment.
+        if self.trust_env:
+            # Set environment's proxies.
+            env_proxies = get_environ_proxies(url) or {}
+            for (k, v) in env_proxies.items():
+                proxies.setdefault(k, v)
+
+            # Look for configuration.
+            if not verify and verify is not False:
+                verify = os.environ.get('REQUESTS_CA_BUNDLE')
+
+            # Curl compatibility.
+            if not verify and verify is not False:
+                verify = os.environ.get('CURL_CA_BUNDLE')
+
+        # Merge all the kwargs.
+        proxies = merge_setting(proxies, self.proxies)
+        verify = merge_setting(verify, self.verify)
+        cert = merge_setting(cert, self.cert)
+
+        # Send the request.
+        send_kwargs = {
+            'timeout': timeout,
+            'verify': verify,
+            'cert': cert,
+            'proxies': proxies,
+            'assertHostName': assertHostName,
+        }
+
+        adapter = self.get_adapter(url=prep.url)
+        return adapter.get_upload_stream(prep, **send_kwargs)
+
     def get(self, url, **kwargs):
         """Sends a GET request. Returns :class:`Response` object.
 
