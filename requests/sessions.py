@@ -403,7 +403,8 @@ class Session(SessionRedirectMixin):
         stream=None,
         verify=None,
         cert=None,
-        json=None):
+        json=None,
+        assertHostName=None):
         """Constructs a :class:`Request <Request>`, prepares it and sends it.
         Returns :class:`Response <Response>` object.
 
@@ -463,6 +464,7 @@ class Session(SessionRedirectMixin):
         send_kwargs = {
             'timeout': timeout,
             'allow_redirects': allow_redirects,
+            'assertHostName': assertHostName
         }
         send_kwargs.update(settings)
         resp = self.send(prep, **send_kwargs)
