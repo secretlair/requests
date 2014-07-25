@@ -456,7 +456,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
             l = super_len(body)
             if l:
                 self.headers['Content-Length'] = builtin_str(l)
-        elif self.method not in ('GET', 'HEAD'):
+        elif self.method not in ('GET', 'HEAD') and "Content-Length" not in self.headers:
             self.headers['Content-Length'] = '0'
 
     def prepare_auth(self, auth, url=''):
