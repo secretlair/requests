@@ -145,7 +145,7 @@ class HTTPAdapter(BaseAdapter):
 
         return self.proxy_manager[proxy]
 
-    def cert_verify(self, conn, url, verify, cert):
+    def cert_verify(self, conn, url, verify, cert, assertHostName=None):
         """Verify a SSL certificate. This method should not be called from user
         code, and is only exposed for use when subclassing the
         :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`.
@@ -174,7 +174,7 @@ class HTTPAdapter(BaseAdapter):
         else:
             conn.cert_reqs = 'CERT_NONE'
             conn.ca_certs = None
-
+            conn.assert_hostname = assertHostName
         if cert:
             if not isinstance(cert, basestring):
                 conn.cert_file = cert[0]
@@ -309,7 +309,7 @@ class HTTPAdapter(BaseAdapter):
 
         return headers
 
-    def send(self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None):
+    def send(self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None, assertHostName=None):
         """Sends PreparedRequest object. Returns Response object.
 
         :param request: The :class:`PreparedRequest <PreparedRequest>` being sent.
@@ -322,7 +322,7 @@ class HTTPAdapter(BaseAdapter):
 
         conn = self.get_connection(request.url, proxies)
 
-        self.cert_verify(conn, request.url, verify, cert)
+        self.cert_verify(conn, request.url, verify, cert, assertHostName)
         url = self.request_url(request, proxies)
         self.add_headers(request)
 
