@@ -153,3 +153,8 @@ Patches and Suggestions
 - Erik Wickstrom <erik@erikwickstrom.com> (`@erikwickstrom <https://github.com/erikwickstrom>`_)
 - Константин Подшумок (`@podshumok <https://github.com/podshumok>`_)
 - Ben Bass (`@codedstructure <https://github.com/codedstructure>`_)
+- Jonathan Wong <evolutionace@gmail.com> (`@ContinuousFunction <https://github.com/ContinuousFunction>`_)
+- Martin Jul (`@mjul <https://github.com/mjul>`_)
+- Joe Alcorn (`@buttscicles <https://github.com/buttscicles>`_)
+- Syed Suhail Ahmed <ssuhail.ahmed93@gmail.com> (`@syedsuhail <https://github.com/syedsuhail>`_)
+- Scott Sadler (`@ssadler <https://github.com/ssadler>`_)

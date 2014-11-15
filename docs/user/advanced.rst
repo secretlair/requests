@@ -166,7 +166,7 @@ I don't have SSL setup on this domain, so it fails. Excellent. GitHub does thoug
     >>> requests.get('https://github.com', verify=True)
     <Response [200]>
 
-You can also pass ``verify`` the path to a CA_BUNDLE file for private certs. You can also set the ``REQUESTS_CA_BUNDLE`` environment variable.
+You can pass ``verify`` the path to a CA_BUNDLE file with certificates of trusted CAs. This list of trusted CAs can also be specified through the ``REQUESTS_CA_BUNDLE`` environment variable.
 
 Requests can also ignore verifying the SSL certificate if you set ``verify`` to False.
 
@@ -194,7 +194,7 @@ Body Content Workflow
 ---------------------
 
 By default, when you make a request, the body of the response is downloaded
-immediately. You can override this behavior and defer downloading the response
+immediately. You can override this behaviour and defer downloading the response
 body until you access the :class:`Response.content <requests.Response.content>`
 attribute with the ``stream`` parameter::
 
@@ -265,6 +265,30 @@ a length) for your body::
         yield 'there'
 
     requests.post('http://some.url/chunked', data=gen())
+
+
+
+POST Multiple Multipart-Encoded Files
+-------------------------------------
+
+You can send multiple files in one request. For example, suppose you want to
+upload image files to an HTML form with a multiple file field 'images':
+
+    <input type="file" name="images" multiple="true" required="true"/>
+
+To do that, just set files to a list of tuples of (form_field_name, file_info):
+
+    >>> url = 'http://httpbin.org/post'
+    >>> multiple_files = [('images', ('foo.png', open('foo.png', 'rb'), 'image/png')),
+                          ('images', ('bar.png', open('bar.png', 'rb'), 'image/png'))]
+    >>> r = requests.post(url, files=multiple_files)
+    >>> r.text
+    {
+      ...
+      'files': {'images': 'data:image/png;base64,iVBORw ....'}
+      'Content-Type': 'multipart/form-data; boundary=3131623adb2043caaeb5538cc7aa0b3a',
+      ...
+    }
 
 
 Event Hooks
@@ -703,3 +727,59 @@ Two excellent examples are `grequests`_ and `requests-futures`_.
 
 .. _`grequests`: https://github.com/kennethreitz/grequests
 .. _`requests-futures`: https://github.com/ross/requests-futures
+
+Timeouts
+--------
+
+Most requests to external servers should have a timeout attached, in case the
+server is not responding in a timely manner. Without a timeout, your code may
+hang for minutes or more.
+
+The **connect** timeout is the number of seconds Requests will wait for your
+client to establish a connection to a remote machine (corresponding to the
+`connect()`_) call on the socket. It's a good practice to set connect timeouts
+to slightly larger than a multiple of 3, which is the default `TCP packet
+retransmission window <http://www.hjp.at/doc/rfc/rfc2988.txt>`_.
+
+Once your client has connected to the server and sent the HTTP request, the
+**read** timeout is the number of seconds the client will wait for the server
+to send a response. (Specifically, it's the number of seconds that the client
+will wait *between* bytes sent from the server. In 99.9% of cases, this is the
+time before the server sends the first byte).
+
+If you specify a single value for the timeout, like this::
+
+    r = requests.get('https://github.com', timeout=5)
+
+The timeout value will be applied to both the ``connect`` and the ``read``
+timeouts. Specify a tuple if you would like to set the values separately::
+
+    r = requests.get('https://github.com', timeout=(3.05, 27))
+
+If the remote server is very slow, you can tell Requests to wait forever for
+a response, by passing None as a timeout value and then retrieving a cup of
+coffee.
+
+.. code-block:: python
+
+    r = requests.get('https://github.com', timeout=None)
+
+.. _`connect()`: http://linux.die.net/man/2/connect
+
+CA Certificates
+---------------
+
+By default Requests bundles a set of root CAs that it trusts, sourced from the
+`Mozilla trust store`_. However, these are only updated once for each Requests
+version. This means that if you pin a Requests version your certificates can
+become extremely out of date.
+
+From Requests version 2.4.0 onwards, Requests will attempt to use certificates
+from `certifi`_ if it is present on the system. This allows for users to update
+their trusted certificates without having to change the code that runs on their
+system.
+
+For the sake of security we recommend upgrading certifi frequently!
+
+.. _certifi: http://certifi.io/
+.. _Mozilla trust store: https://hg.mozilla.org/mozilla-central/raw-file/tip/security/nss/lib/ckfw/builtins/certdata.txt

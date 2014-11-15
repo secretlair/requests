@@ -18,7 +18,9 @@ from requests.auth import HTTPDigestAuth, _basic_auth_str
 from requests.compat import (
     Morsel, cookielib, getproxies, str, urljoin, urlparse, is_py3, builtin_str)
 from requests.cookies import cookiejar_from_dict, morsel_to_cookie
-from requests.exceptions import InvalidURL, MissingSchema
+from requests.exceptions import (ConnectionError, ConnectTimeout,
+                                 InvalidSchema, InvalidURL, MissingSchema,
+                                 ReadTimeout, Timeout)
 from requests.models import PreparedRequest
 from requests.structures import CaseInsensitiveDict
 from requests.sessions import SessionRedirectMixin
@@ -38,6 +40,9 @@ else:
         return s.decode('unicode-escape')
 
 
+# Requests to this URL should always fail with a connection timeout (nothing
+# listening on that port)
+TARPIT = "http://10.255.255.1"
 HTTPBIN = os.environ.get('HTTPBIN_URL', 'http://httpbin.org/')
 # Issue #1483: Make sure the URL always has a trailing slash
 HTTPBIN = HTTPBIN.rstrip('/') + '/'
@@ -74,6 +79,12 @@ class RequestsTestCase(unittest.TestCase):
     def test_invalid_url(self):
         with pytest.raises(MissingSchema):
             requests.get('hiwpefhipowhefopw')
+        with pytest.raises(InvalidSchema):
+            requests.get('localhost:3128')
+        with pytest.raises(InvalidSchema):
+            requests.get('localhost.localdomain:3128/')
+        with pytest.raises(InvalidSchema):
+            requests.get('10.122.1.1:3128/')
         with pytest.raises(InvalidURL):
             requests.get('http://')
 
@@ -91,6 +102,14 @@ class RequestsTestCase(unittest.TestCase):
         assert 'Content-Length' not in get_req.headers
         head_req = requests.Request('HEAD', httpbin('head')).prepare()
         assert 'Content-Length' not in head_req.headers
+
+    def test_override_content_length(self):
+        headers = {
+            'Content-Length': 'not zero'
+        }
+        r = requests.Request('POST', httpbin('post'), headers=headers).prepare()
+        assert 'Content-Length' in r.headers
+        assert r.headers['Content-Length'] == 'not zero'
 
     def test_path_is_not_double_encoded(self):
         request = requests.Request('GET', "http://0.0.0.0/get/test case").prepare()
@@ -281,6 +300,14 @@ class RequestsTestCase(unittest.TestCase):
         s.auth = auth
         r = s.get(url)
         assert r.status_code == 200
+
+    def test_connection_error(self):
+        """Connecting to an unknown domain should raise a ConnectionError"""
+        with pytest.raises(ConnectionError):
+            requests.get("http://fooobarbangbazbing.httpbin.org")
+
+        with pytest.raises(ConnectionError):
+            requests.get("http://httpbin.org:1")
 
     def test_basicauth_with_netrc(self):
         auth = ('user', 'pass')
@@ -571,6 +598,12 @@ class RequestsTestCase(unittest.TestCase):
 
         assert resp.json()['headers'][
             'Dummy-Auth-Test'] == 'dummy-auth-test-ok'
+
+    def test_prepare_request_with_bytestring_url(self):
+        req = requests.Request('GET', b'https://httpbin.org/')
+        s = requests.Session()
+        prep = s.prepare_request(req)
+        assert prep.url == "https://httpbin.org/"
 
     def test_links(self):
         r = requests.Response()
@@ -903,7 +936,7 @@ class RequestsTestCase(unittest.TestCase):
 
         assert p.headers['Content-Length'] == length
 
-    def test_oddball_schemes_dont_check_URLs(self):
+    def test_nonhttp_schemes_dont_check_URLs(self):
         test_urls = (
             'data:image/gif;base64,R0lGODlhAQABAHAAACH5BAUAAAAALAAAAAABAAEAAAICRAEAOw==',
             'file:///etc/passwd',
@@ -973,6 +1006,23 @@ class RequestsTestCase(unittest.TestCase):
         s = _basic_auth_str("test", "test")
         assert isinstance(s, builtin_str)
         assert s == "Basic dGVzdDp0ZXN0"
+
+    def test_requests_history_is_saved(self):
+        r = requests.get('https://httpbin.org/redirect/5')
+        total = r.history[-1].history
+        i = 0
+        for item in r.history:
+            assert item.history == total[0:i]
+            i=i+1
+
+    def test_json_param_post_content_type_works(self):
+        r = requests.post(
+            httpbin('post'),
+            json={'life': 42}
+        )
+        assert r.status_code == 200
+        assert 'application/json' in r.request.headers['Content-Type']
+        assert {'life': 42} == r.json()['json']
 
 
 class TestContentEncodingDetection(unittest.TestCase):
@@ -1300,9 +1350,57 @@ class TestMorselToCookieMaxAge(unittest.TestCase):
 class TestTimeout:
     def test_stream_timeout(self):
         try:
-            requests.get('https://httpbin.org/delay/10', timeout=5.0)
+            requests.get('https://httpbin.org/delay/10', timeout=2.0)
         except requests.exceptions.Timeout as e:
             assert 'Read timed out' in e.args[0].args[0]
+
+    def test_invalid_timeout(self):
+        with pytest.raises(ValueError) as e:
+            requests.get(httpbin('get'), timeout=(3, 4, 5))
+        assert '(connect, read)' in str(e)
+
+        with pytest.raises(ValueError) as e:
+            requests.get(httpbin('get'), timeout="foo")
+        assert 'must be an int or float' in str(e)
+
+    def test_none_timeout(self):
+        """ Check that you can set None as a valid timeout value.
+
+        To actually test this behavior, we'd want to check that setting the
+        timeout to None actually lets the request block past the system default
+        timeout. However, this would make the test suite unbearably slow.
+        Instead we verify that setting the timeout to None does not prevent the
+        request from succeeding.
+        """
+        r = requests.get(httpbin('get'), timeout=None)
+        assert r.status_code == 200
+
+    def test_read_timeout(self):
+        try:
+            requests.get(httpbin('delay/10'), timeout=(None, 0.1))
+            assert False, "The recv() request should time out."
+        except ReadTimeout:
+            pass
+
+    def test_connect_timeout(self):
+        try:
+            requests.get(TARPIT, timeout=(0.1, None))
+            assert False, "The connect() request should time out."
+        except ConnectTimeout as e:
+            assert isinstance(e, ConnectionError)
+            assert isinstance(e, Timeout)
+
+    def test_total_timeout_connect(self):
+        try:
+            requests.get(TARPIT, timeout=(0.1, 0.1))
+            assert False, "The connect() request should time out."
+        except ConnectTimeout:
+            pass
+
+    def test_encoded_methods(self):
+        """See: https://github.com/kennethreitz/requests/issues/2316"""
+        r = requests.request(b'GET', httpbin('get'))
+        assert r.ok
 
 
 SendCall = collections.namedtuple('SendCall', ('args', 'kwargs'))
@@ -1364,6 +1462,7 @@ class TestRedirects:
             assert session.calls[-1] == send_call
 
 
+
 @pytest.fixture
 def list_of_tuples():
     return [
@@ -1418,6 +1517,15 @@ def test_prepared_request_complete_copy():
         data='foo=bar',
         hooks=default_hooks(),
         cookies={'foo': 'bar'}
+    )
+    assert_copy(p, p.copy())
+
+def test_prepare_unicode_url():
+    p = PreparedRequest()
+    p.prepare(
+        method='GET',
+        url=u('http://www.example.com/üniçø∂é'),
+        hooks=[]
     )
     assert_copy(p, p.copy())
 

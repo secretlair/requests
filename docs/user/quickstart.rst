@@ -29,9 +29,9 @@ Begin by importing the Requests module::
 Now, let's try to get a webpage. For this example, let's get GitHub's public
 timeline ::
 
-    >>> r = requests.get('https://github.com/timeline.json')
+    >>> r = requests.get('https://api.github.com/events')
 
-Now, we have a :class:`Request <requests.Request>` object called ``r``. We can
+Now, we have a :class:`Response <requests.Response>` object called ``r``. We can
 get all the information we need from this object.
 
 Requests' simple API means that all forms of HTTP request are as obvious. For
@@ -81,7 +81,7 @@ We can read the content of the server's response. Consider the GitHub timeline
 again::
 
     >>> import requests
-    >>> r = requests.get('https://github.com/timeline.json')
+    >>> r = requests.get('https://api.github.com/events')
     >>> r.text
     u'[{"repository":{"open_issues":0,"url":"https://github.com/...
 
@@ -134,7 +134,7 @@ JSON Response Content
 There's also a builtin JSON decoder, in case you're dealing with JSON data::
 
     >>> import requests
-    >>> r = requests.get('https://github.com/timeline.json')
+    >>> r = requests.get('https://api.github.com/events')
     >>> r.json()
     [{u'repository': {u'open_issues': 0, u'url': 'https://github.com/...
 
@@ -150,7 +150,7 @@ In the rare case that you'd like to get the raw socket response from the
 server, you can access ``r.raw``. If you want to do this, make sure you set
 ``stream=True`` in your initial request. Once you do, you can do this::
 
-    >>> r = requests.get('https://github.com/timeline.json', stream=True)
+    >>> r = requests.get('https://api.github.com/events', stream=True)
     >>> r.raw
     <requests.packages.urllib3.response.HTTPResponse object at 0x101194810>
     >>> r.raw.read(10)
@@ -270,6 +270,9 @@ support this, but there is a separate package which does -
 ``requests-toolbelt``. You should read `the toolbelt's documentation
 <https://toolbelt.rtfd.org>`_ for more details about how to use it.
 
+For sending multiple files in one request refer to the :ref:`advanced <advanced>`
+section.
+
 
 Response Status Codes
 ---------------------
@@ -369,9 +372,9 @@ HEAD.
 We can use the ``history`` property of the Response object to track redirection.
 
 The :meth:`Response.history <requests.Response.history>` list contains the
-:class:`Request <requests.Request>` objects that were created in order to
+:class:`Response <requests.Response>` objects that were created in order to
 complete the request. The list is sorted from the oldest to the most recent
-request.
+response.
 
 For example, GitHub redirects all HTTP requests to HTTPS::
 
