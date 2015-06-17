@@ -90,7 +90,7 @@ if is_py2:
     from Cookie import Morsel
     from StringIO import StringIO
     from .packages.urllib3.packages.ordered_dict import OrderedDict
-    from httplib import IncompleteRead
+    from .packages.httplib import IncompleteRead
 
     builtin_str = str
     bytes = str

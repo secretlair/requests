@@ -15,13 +15,13 @@ if sys.argv[-1] == 'publish':
     sys.exit()
 
 packages = [
-    'requests',
-    'requests.packages',
-    'requests.packages.charade',
-    'requests.packages.urllib3',
-    'requests.packages.urllib3.packages',
-    'requests.packages.urllib3.contrib',
-    'requests.packages.urllib3.packages.ssl_match_hostname'
+    'requests_force_socket',
+    'requests_force_socket.packages',
+    'requests_force_socket.packages.charade',
+    'requests_force_socket.packages.urllib3',
+    'requests_force_socket.packages.urllib3.packages',
+    'requests_force_socket.packages.urllib3.contrib',
+    'requests_force_socket.packages.urllib3.packages.ssl_match_hostname'
 ]
 
 requires = []
@@ -34,7 +34,7 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='requests',
+    name='requests_force_socket',
     version=requests.__version__,
     description='Python HTTP for Humans.',
     long_description=readme + '\n\n' + history,
@@ -42,8 +42,8 @@ setup(
     author_email='me@kennethreitz.com',
     url='http://python-requests.org',
     packages=packages,
-    package_data={'': ['LICENSE', 'NOTICE'], 'requests': ['*.pem']},
-    package_dir={'requests': 'requests'},
+    package_data={'': ['LICENSE', 'NOTICE'], 'requests_force_socket': ['*.pem']},
+    package_dir={'requests_force_socket': 'requests'},
     include_package_data=True,
     install_requires=requires,
     license=license,
