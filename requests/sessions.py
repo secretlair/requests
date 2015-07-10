@@ -13,8 +13,11 @@ import functools
 import os
 from collections import Mapping
 from datetime import datetime
-
-from google.appengine.api.urlfetch_errors import InternalTransientError
+try:
+    from google.appengine.api.urlfetch_errors import InternalTransientError
+except ImportError as e:
+    class InternalTransientError(object):
+        pass
 
 from .compat import cookielib, OrderedDict, urljoin, urlparse, builtin_str
 from .cookies import (
