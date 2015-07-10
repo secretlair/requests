@@ -8,9 +8,13 @@ This module provides a Session object to manage and persist settings across
 requests (cookies, auth, proxies).
 
 """
+
+import functools
 import os
 from collections import Mapping
 from datetime import datetime
+
+from google.appengine.api.urlfetch_errors import InternalTransientError
 
 from .compat import cookielib, OrderedDict, urljoin, urlparse, builtin_str
 from .cookies import (
@@ -26,6 +30,16 @@ from .adapters import HTTPAdapter
 from .utils import requote_uri, get_environ_proxies, get_netrc_auth
 
 from .status_codes import codes
+
+def gae_retry(f):
+    @functools.wraps(f)
+    def retried_function(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except InternalTransientError as e:
+            return f(*args, **kwargs)
+    return retried_function
+
 REDIRECT_STATI = (
     codes.moved, # 301
     codes.found, # 302
@@ -287,6 +301,7 @@ class Session(SessionRedirectMixin):
         )
         return p
 
+    @gae_retry
     def request(self, method, url,
         params=None,
         data=None,
