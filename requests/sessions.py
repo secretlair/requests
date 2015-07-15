@@ -11,6 +11,7 @@ requests (cookies, auth, proxies).
 
 import functools
 import os
+import time
 from collections import Mapping
 from datetime import datetime
 try:
@@ -34,13 +35,16 @@ from .utils import requote_uri, get_environ_proxies, get_netrc_auth
 
 from .status_codes import codes
 
+
 def gae_retry(f):
     @functools.wraps(f)
     def retried_function(*args, **kwargs):
-        try:
-            return f(*args, **kwargs)
-        except InternalTransientError as e:
-            return f(*args, **kwargs)
+        for attempt in range(4):
+            try:
+                return f(*args, **kwargs)
+            except InternalTransientError as e:
+                time.sleep(2 ** (attempt - 1))
+                return f(*args, **kwargs)
     return retried_function
 
 REDIRECT_STATI = (
