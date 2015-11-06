@@ -93,6 +93,8 @@ class UploadStream(object):
         if not self._connection:
             return
 
+        self._lowLevelConnection.sock.settimeout(self._timeout)
+
         r = self._lowLevelConnection.getresponse()
         resp = HTTPResponse.from_httplib(r,
             pool=self._connection,
