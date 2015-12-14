@@ -469,6 +469,7 @@ class Session(SessionRedirectMixin):
                           headers = None,
                           auth = None,
                           timeout = None,
+                          readTimeout = None,
                           proxies = None,
                           verify = None,
                           cert = None,
@@ -507,9 +508,14 @@ class Session(SessionRedirectMixin):
         verify = merge_setting(verify, self.verify)
         cert = merge_setting(cert, self.cert)
 
+        # Set timeout variables
+        if not readTimeout:
+            readTimeout = timeout
+
         # Send the request.
         send_kwargs = {
             'timeout': timeout,
+            'readTimeout': readTimeout,
             'verify': verify,
             'cert': cert,
             'proxies': proxies,
