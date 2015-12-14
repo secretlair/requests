@@ -36,10 +36,11 @@ def remap_exception(fn):
 
 class UploadStream(object):
 
-    def __init__(self, adapter, request, timeout=None, verify=True, cert=None, proxies=None, assertHostName=None):
+    def __init__(self, adapter, request, timeout=None, readTimeout=None, verify=True, cert=None, proxies=None, assertHostName=None):
         self._adapter = adapter
         self._request = request
         self._timeout = timeout
+        self._readTimeout = readTimeout
         self._verify = verify
         self._cert = cert
         self._proxies = proxies
@@ -56,7 +57,7 @@ class UploadStream(object):
         url = self._adapter.request_url(self._request, self._proxies)
         self._adapter.add_headers(self._request)
 
-        timeout = TimeoutSauce(connect=self._timeout, read=self._timeout)
+        timeout = TimeoutSauce(connect=self._timeout, read=self._readTimeout)
 
         try:
             if hasattr(self._connection, 'proxy_pool'):
