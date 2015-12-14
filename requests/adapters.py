@@ -327,8 +327,8 @@ class HTTPAdapter(BaseAdapter):
 
         return headers
 
-    def get_upload_stream(self, request, timeout=None, verify=True, cert=None, proxies=None, assertHostName=None):
-        return UploadStream(self, request, timeout=timeout, verify=verify, cert=cert, proxies=proxies,
+    def get_upload_stream(self, request, timeout=None, readTimeout=None, verify=True, cert=None, proxies=None, assertHostName=None):
+        return UploadStream(self, request, timeout=timeout, readTimeout=readTimeout, verify=verify, cert=cert, proxies=proxies,
                             assertHostName=assertHostName)
 
     def send(self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None, assertHostName=None):
