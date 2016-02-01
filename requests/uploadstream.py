@@ -36,11 +36,10 @@ def remap_exception(fn):
 
 class UploadStream(object):
 
-    def __init__(self, adapter, request, timeout=None, readTimeout=None, verify=True, cert=None, proxies=None, assertHostName=None):
+    def __init__(self, adapter, request, timeout=None, verify=True, cert=None, proxies=None, assertHostName=None):
         self._adapter = adapter
         self._request = request
         self._timeout = timeout
-        self._readTimeout = readTimeout
         self._verify = verify
         self._cert = cert
         self._proxies = proxies
@@ -48,6 +47,19 @@ class UploadStream(object):
         self._connection = None
         self._lowLevelConnection = None
         self._assertHostName = assertHostName
+
+        if isinstance(timeout, tuple):
+            try:
+                connect, read = timeout
+                self._timeout = TimeoutSauce(connect=connect, read=read)
+            except ValueError as e:
+                # this may raise a string formatting error.
+                err = ("Invalid timeout {0}. Pass a (connect, read) "
+                       "timeout tuple, or a single float to set "
+                       "both timeouts to the same value".format(timeout))
+                raise ValueError(err)
+        else:
+            self._timeout = TimeoutSauce(connect=timeout, read=timeout)
 
     @remap_exception
     def open(self):
@@ -57,13 +69,11 @@ class UploadStream(object):
         url = self._adapter.request_url(self._request, self._proxies)
         self._adapter.add_headers(self._request)
 
-        timeout = TimeoutSauce(connect=self._timeout, read=self._readTimeout)
-
         try:
             if hasattr(self._connection, 'proxy_pool'):
                 self._connection = self._connection.proxy_pool
 
-            self._lowLevelConnection = self._connection._get_conn(timeout=timeout)
+            self._lowLevelConnection = self._connection._get_conn(timeout=self._timeout.connect_timeout)
             self._lowLevelConnection.putrequest(self._request.method, url, skip_accept_encoding=True)
 
             for header, value in self._request.headers.items():
@@ -94,7 +104,7 @@ class UploadStream(object):
         if not self._connection:
             return
 
-        self._lowLevelConnection.sock.settimeout(self._timeout)
+        self._lowLevelConnection.sock.settimeout(self._timeout.read_timeout)
 
         r = self._lowLevelConnection.getresponse()
         resp = HTTPResponse.from_httplib(r,
