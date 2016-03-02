@@ -74,6 +74,7 @@ class UploadStream(object):
                 self._connection = self._connection.proxy_pool
 
             self._lowLevelConnection = self._connection._get_conn(timeout=self._timeout.connect_timeout)
+            self._lowLevelConnection.timeout = self._timeout.connect_timeout
             self._lowLevelConnection.putrequest(self._request.method, url, skip_accept_encoding=True)
 
             for header, value in self._request.headers.items():
