@@ -23,13 +23,23 @@ Development Dependencies
 
 You'll need to install py.test in order to run the Requests' test suite::
 
-    $ pip install -r requirements.txt
-    $ py.test
-    platform darwin -- Python 2.7.3 -- pytest-2.3.4
-    collected 25 items
+    $ pip install pipenv
+    $ pipenv lock
+    $ pipenv install --dev
+    $ pipenv run py.test tests
+    ============================= test session starts ==============================
+    platform darwin -- Python 3.4.4, pytest-3.0.6, py-1.4.32, pluggy-0.4.0
+    ...
+    collected 445 items
 
-    test_requests.py .........................
-    25 passed in 3.50 seconds
+    tests/test_hooks.py ...
+    tests/test_lowlevel.py ............
+    tests/test_requests.py ...........................................................
+    tests/test_structures.py ....................
+    tests/test_testserver.py ...........
+    tests/test_utils.py ..s...........................................................
+
+    ============== 442 passed, 1 skipped, 2 xpassed in 46.48 seconds ===============
 
 Runtime Environments
 --------------------
@@ -38,14 +48,16 @@ Requests currently supports the following versions of Python:
 
 - Python 2.6
 - Python 2.7
-- Python 3.1
-- Python 3.2
 - Python 3.3
-- PyPy 1.9
+- Python 3.4
+- Python 3.5
+- Python 3.6
+- PyPy
 
-Support for Python 3.1 and 3.2 may be dropped at any time.
+Google AppEngine is not officially supported although support is available
+with the `Requests-Toolbelt`_.
 
-Google App Engine will never be officially supported. Pull Requests for compatibility will be accepted, as long as they don't complicate the codebase.
+.. _Requests-Toolbelt: http://toolbelt.readthedocs.io/
 
 
 Are you crazy?
