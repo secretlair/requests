@@ -37,7 +37,8 @@ netrc Authentication
 
 If no authentication method is given with the ``auth`` argument, Requests will
 attempt to get the authentication credentials for the URL's hostname from the
-user's netrc file.
+user's netrc file. The netrc file overrides raw HTTP authentication headers
+set with `headers=`.
 
 If credentials for the hostname are found, the request is sent with HTTP Basic
 Auth.
@@ -59,14 +60,14 @@ OAuth 1 Authentication
 ----------------------
 
 A common form of authentication for several web APIs is OAuth. The ``requests-oauthlib``
-library allows Requests users to easily make OAuth authenticated requests::
+library allows Requests users to easily make OAuth 1 authenticated requests::
 
     >>> import requests
     >>> from requests_oauthlib import OAuth1
 
     >>> url = 'https://api.twitter.com/1.1/account/verify_credentials.json'
     >>> auth = OAuth1('YOUR_APP_KEY', 'YOUR_APP_SECRET',
-                      'USER_OAUTH_TOKEN', 'USER_OAUTH_TOKEN_SECRET')
+    ...               'USER_OAUTH_TOKEN', 'USER_OAUTH_TOKEN_SECRET')
 
     >>> requests.get(url, auth=auth)
     <Response [200]>
@@ -75,6 +76,17 @@ For more information on how to OAuth flow works, please see the official `OAuth`
 For examples and documentation on requests-oauthlib, please see the `requests_oauthlib`_
 repository on GitHub
 
+OAuth 2 and OpenID Connect Authentication
+-----------------------------------------
+
+The ``requests-oauthlib`` library also handles OAuth 2, the authentication mechanism
+underpinning OpenID Connect. See the `requests-oauthlib OAuth2 documentation`_ for
+details of the various OAuth 2 credential management flows:
+
+* `Web Application Flow`_
+* `Mobile Application Flow`_
+* `Legacy Application Flow`_
+* `Backend Application Flow`_
 
 Other Authentication
 --------------------
@@ -122,7 +134,11 @@ Further examples can be found under the `Requests organization`_ and in the
 
 .. _OAuth: http://oauth.net/
 .. _requests_oauthlib: https://github.com/requests/requests-oauthlib
+.. _requests-oauthlib OAuth2 documentation: http://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html
+.. _Web Application Flow: http://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html#web-application-flow
+.. _Mobile Application Flow: http://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html#mobile-application-flow
+.. _Legacy Application Flow:  http://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html#legacy-application-flow
+.. _Backend Application Flow:  http://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html#backend-application-flow
 .. _Kerberos: https://github.com/requests/requests-kerberos
 .. _NTLM: https://github.com/requests/requests-ntlm
 .. _Requests organization: https://github.com/requests
-

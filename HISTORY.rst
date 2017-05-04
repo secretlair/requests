@@ -3,6 +3,368 @@
 Release History
 ---------------
 
+**Unreleased**
++++++++++++++++++++
+
+- The behavior of ``SessionRedirectMixin`` was slightly altered.
+  ``resolve_redirects`` will now detect a redirect by calling
+  ``get_redirect_target(response)`` instead of directly
+  querying ``Response.is_redirect`` and ``Response.headers['location']``.
+  Advanced users will be able to process malformed redirects more easily.
+- Changed the internal calculation of elapsed request time to have higher
+  resolution on Windows.
+- Added ``win_inet_pton`` as conditional dependency for the ``[socks]`` extra
+  on Windows with Python 2.7.
+
+2.13.0 (2017-01-24)
++++++++++++++++++++
+
+**Features**
+
+- Only load the ``idna`` library when we've determined we need it. This will
+  save some memory for users.
+
+**Miscellaneous**
+
+- Updated bundled urllib3 to 1.20.
+- Updated bundled idna to 2.2.
+
+2.12.5 (2017-01-18)
++++++++++++++++++++
+
+**Bugfixes**
+
+- Fixed an issue with JSON encoding detection, specifically detecting
+  big-endian UTF-32 with BOM.
+
+2.12.4 (2016-12-14)
++++++++++++++++++++
+
+**Bugfixes**
+
+- Fixed regression from 2.12.2 where non-string types were rejected in the
+  basic auth parameters. While support for this behaviour has been readded,
+  the behaviour is deprecated and will be removed in the future.
+
+2.12.3 (2016-12-01)
++++++++++++++++++++
+
+**Bugfixes**
+
+- Fixed regression from v2.12.1 for URLs with schemes that begin with "http".
+  These URLs have historically been processed as though they were HTTP-schemed
+  URLs, and so have had parameters added. This was removed in v2.12.2 in an
+  overzealous attempt to resolve problems with IDNA-encoding those URLs. This
+  change was reverted: the other fixes for IDNA-encoding have been judged to
+  be sufficient to return to the behaviour Requests had before v2.12.0.
+
+2.12.2 (2016-11-30)
++++++++++++++++++++
+
+**Bugfixes**
+
+- Fixed several issues with IDNA-encoding URLs that are technically invalid but
+  which are widely accepted. Requests will now attempt to IDNA-encode a URL if
+  it can but, if it fails, and the host contains only ASCII characters, it will
+  be passed through optimistically. This will allow users to opt-in to using
+  IDNA2003 themselves if they want to, and will also allow technically invalid
+  but still common hostnames.
+- Fixed an issue where URLs with leading whitespace would raise
+  ``InvalidSchema`` errors.
+- Fixed an issue where some URLs without the HTTP or HTTPS schemes would still
+  have HTTP URL preparation applied to them.
+- Fixed an issue where Unicode strings could not be used in basic auth.
+- Fixed an issue encountered by some Requests plugins where constructing a
+  Response object would cause ``Response.content`` to raise an
+  ``AttributeError``.
+
+2.12.1 (2016-11-16)
++++++++++++++++++++
+
+**Bugfixes**
+
+- Updated setuptools 'security' extra for the new PyOpenSSL backend in urllib3.
+
+**Miscellaneous**
+
+- Updated bundled urllib3 to 1.19.1.
+
+2.12.0 (2016-11-15)
++++++++++++++++++++
+
+**Improvements**
+
+- Updated support for internationalized domain names from IDNA2003 to IDNA2008.
+  This updated support is required for several forms of IDNs and is mandatory
+  for .de domains.
+- Much improved heuristics for guessing content lengths: Requests will no
+  longer read an entire ``StringIO`` into memory.
+- Much improved logic for recalculating ``Content-Length`` headers for
+  ``PreparedRequest`` objects.
+- Improved tolerance for file-like objects that have no ``tell`` method but
+  do have a ``seek`` method.
+- Anything that is a subclass of ``Mapping`` is now treated like a dictionary
+  by the ``data=`` keyword argument.
+- Requests now tolerates empty passwords in proxy credentials, rather than
+  stripping the credentials.
+- If a request is made with a file-like object as the body and that request is
+  redirected with a 307 or 308 status code, Requests will now attempt to
+  rewind the body object so it can be replayed.
+
+**Bugfixes**
+
+- When calling ``response.close``, the call to ``close`` will be propagated
+  through to non-urllib3 backends.
+- Fixed issue where the ``ALL_PROXY`` environment variable would be preferred
+  over scheme-specific variables like ``HTTP_PROXY``.
+- Fixed issue where non-UTF8 reason phrases got severely mangled by falling
+  back to decoding using ISO 8859-1 instead.
+- Fixed a bug where Requests would not correctly correlate cookies set when
+  using custom Host headers if those Host headers did not use the native
+  string type for the platform.
+
+**Miscellaneous**
+
+- Updated bundled urllib3 to 1.19.
+- Updated bundled certifi certs to 2016.09.26.
+
+2.11.1 (2016-08-17)
++++++++++++++++++++
+
+**Bugfixes**
+
+- Fixed a bug when using ``iter_content`` with ``decode_unicode=True`` for
+  streamed bodies would raise ``AttributeError``. This bug was introduced in
+  2.11.
+- Strip Content-Type and Transfer-Encoding headers from the header block when
+  following a redirect that transforms the verb from POST/PUT to GET.
+
+2.11.0 (2016-08-08)
++++++++++++++++++++
+
+**Improvements**
+
+- Added support for the ``ALL_PROXY`` environment variable.
+- Reject header values that contain leading whitespace or newline characters to
+  reduce risk of header smuggling.
+
+**Bugfixes**
+
+- Fixed occasional ``TypeError`` when attempting to decode a JSON response that
+  occurred in an error case. Now correctly returns a ``ValueError``.
+- Requests would incorrectly ignore a non-CIDR IP address in the ``NO_PROXY``
+  environment variables: Requests now treats it as a specific IP.
+- Fixed a bug when sending JSON data that could cause us to encounter obscure
+  OpenSSL errors in certain network conditions (yes, really).
+- Added type checks to ensure that ``iter_content`` only accepts integers and
+  ``None`` for chunk sizes.
+- Fixed issue where responses whose body had not been fully consumed would have
+  the underlying connection closed but not returned to the connection pool,
+  which could cause Requests to hang in situations where the ``HTTPAdapter``
+  had been configured to use a blocking connection pool.
+
+**Miscellaneous**
+
+- Updated bundled urllib3 to 1.16.
+- Some previous releases accidentally accepted non-strings as acceptable header values. This release does not.
+
+2.10.0 (2016-04-29)
++++++++++++++++++++
+
+**New Features**
+
+- SOCKS Proxy Support! (requires PySocks; ``$ pip install requests[socks]``)
+
+**Miscellaneous**
+
+- Updated bundled urllib3 to 1.15.1.
+
+2.9.2 (2016-04-29)
+++++++++++++++++++
+
+**Improvements**
+
+- Change built-in CaseInsensitiveDict (used for headers) to use OrderedDict
+  as its underlying datastore.
+
+**Bugfixes**
+
+- Don't use redirect_cache if allow_redirects=False
+- When passed objects that throw exceptions from ``tell()``, send them via
+  chunked transfer encoding instead of failing.
+- Raise a ProxyError for proxy related connection issues.
+
+2.9.1 (2015-12-21)
+++++++++++++++++++
+
+**Bugfixes**
+
+- Resolve regression introduced in 2.9.0 that made it impossible to send binary
+  strings as bodies in Python 3.
+- Fixed errors when calculating cookie expiration dates in certain locales.
+
+**Miscellaneous**
+
+- Updated bundled urllib3 to 1.13.1.
+
+2.9.0 (2015-12-15)
+++++++++++++++++++
+
+**Minor Improvements** (Backwards compatible)
+
+- The ``verify`` keyword argument now supports being passed a path to a
+  directory of CA certificates, not just a single-file bundle.
+- Warnings are now emitted when sending files opened in text mode.
+- Added the 511 Network Authentication Required status code to the status code
+  registry.
+
+**Bugfixes**
+
+- For file-like objects that are not seeked to the very beginning, we now
+  send the content length for the number of bytes we will actually read, rather
+  than the total size of the file, allowing partial file uploads.
+- When uploading file-like objects, if they are empty or have no obvious
+  content length we set ``Transfer-Encoding: chunked`` rather than
+  ``Content-Length: 0``.
+- We correctly receive the response in buffered mode when uploading chunked
+  bodies.
+- We now handle being passed a query string as a bytestring on Python 3, by
+  decoding it as UTF-8.
+- Sessions are now closed in all cases (exceptional and not) when using the
+  functional API rather than leaking and waiting for the garbage collector to
+  clean them up.
+- Correctly handle digest auth headers with a malformed ``qop`` directive that
+  contains no token, by treating it the same as if no ``qop`` directive was
+  provided at all.
+- Minor performance improvements when removing specific cookies by name.
+
+**Miscellaneous**
+
+- Updated urllib3 to 1.13.
+
+2.8.1 (2015-10-13)
+++++++++++++++++++
+
+**Bugfixes**
+
+- Update certificate bundle to match ``certifi`` 2015.9.6.2's weak certificate
+  bundle.
+- Fix a bug in 2.8.0 where requests would raise ``ConnectTimeout`` instead of
+  ``ConnectionError``
+- When using the PreparedRequest flow, requests will now correctly respect the
+  ``json`` parameter. Broken in 2.8.0.
+- When using the PreparedRequest flow, requests will now correctly handle a
+  Unicode-string method name on Python 2. Broken in 2.8.0.
+
+2.8.0 (2015-10-05)
+++++++++++++++++++
+
+**Minor Improvements** (Backwards Compatible)
+
+- Requests now supports per-host proxies. This allows the ``proxies``
+  dictionary to have entries of the form
+  ``{'<scheme>://<hostname>': '<proxy>'}``. Host-specific proxies will be used
+  in preference to the previously-supported scheme-specific ones, but the
+  previous syntax will continue to work.
+- ``Response.raise_for_status`` now prints the URL that failed as part of the
+  exception message.
+- ``requests.utils.get_netrc_auth`` now takes an ``raise_errors`` kwarg,
+  defaulting to ``False``. When ``True``, errors parsing ``.netrc`` files cause
+  exceptions to be thrown.
+- Change to bundled projects import logic to make it easier to unbundle
+  requests downstream.
+- Changed the default User-Agent string to avoid leaking data on Linux: now
+  contains only the requests version.
+
+**Bugfixes**
+
+- The ``json`` parameter to ``post()`` and friends will now only be used if
+  neither ``data`` nor ``files`` are present, consistent with the
+  documentation.
+- We now ignore empty fields in the ``NO_PROXY`` environment variable.
+- Fixed problem where ``httplib.BadStatusLine`` would get raised if combining
+  ``stream=True`` with ``contextlib.closing``.
+- Prevented bugs where we would attempt to return the same connection back to
+  the connection pool twice when sending a Chunked body.
+- Miscellaneous minor internal changes.
+- Digest Auth support is now thread safe.
+
+**Updates**
+
+- Updated urllib3 to 1.12.
+
+2.7.0 (2015-05-03)
+++++++++++++++++++
+
+This is the first release that follows our new release process. For more, see
+`our documentation
+<http://docs.python-requests.org/en/latest/community/release-process/>`_.
+
+**Bugfixes**
+
+- Updated urllib3 to 1.10.4, resolving several bugs involving chunked transfer
+  encoding and response framing.
+
+2.6.2 (2015-04-23)
+++++++++++++++++++
+
+**Bugfixes**
+
+- Fix regression where compressed data that was sent as chunked data was not
+  properly decompressed. (#2561)
+
+2.6.1 (2015-04-22)
+++++++++++++++++++
+
+**Bugfixes**
+
+- Remove VendorAlias import machinery introduced in v2.5.2.
+
+- Simplify the PreparedRequest.prepare API: We no longer require the user to
+  pass an empty list to the hooks keyword argument. (c.f. #2552)
+
+- Resolve redirects now receives and forwards all of the original arguments to
+  the adapter. (#2503)
+
+- Handle UnicodeDecodeErrors when trying to deal with a unicode URL that
+  cannot be encoded in ASCII. (#2540)
+
+- Populate the parsed path of the URI field when performing Digest
+  Authentication. (#2426)
+
+- Copy a PreparedRequest's CookieJar more reliably when it is not an instance
+  of RequestsCookieJar. (#2527)
+
+2.6.0 (2015-03-14)
+++++++++++++++++++
+
+**Bugfixes**
+
+- CVE-2015-2296: Fix handling of cookies on redirect. Previously a cookie
+  without a host value set would use the hostname for the redirected URL
+  exposing requests users to session fixation attacks and potentially cookie
+  stealing. This was disclosed privately by Matthew Daley of
+  `BugFuzz <https://bugfuzz.com>`_. This affects all versions of requests from
+  v2.1.0 to v2.5.3 (inclusive on both ends).
+
+- Fix error when requests is an ``install_requires`` dependency and ``python
+  setup.py test`` is run. (#2462)
+
+- Fix error when urllib3 is unbundled and requests continues to use the
+  vendored import location.
+
+- Include fixes to ``urllib3``'s header handling.
+
+- Requests' handling of unvendored dependencies is now more restrictive.
+
+**Features and Improvements**
+
+- Support bytearrays when passed as parameters in the ``files`` argument.
+  (#2468)
+
+- Avoid data duplication when creating a request with ``str``, ``bytes``, or
+  ``bytearray`` input to the ``files`` argument.
+
 2.5.3 (2015-02-24)
 ++++++++++++++++++
 
@@ -90,7 +452,7 @@ Release History
 **Bugfixes**
 
 - Only parse the URL once (#2353)
-- Allow Content-Length header to always be overriden (#2332)
+- Allow Content-Length header to always be overridden (#2332)
 - Properly handle files in HTTPDigestAuth (#2333)
 - Cap redirect_cache size to prevent memory abuse (#2299)
 - Fix HTTPDigestAuth handling of redirects after authenticating successfully
@@ -402,7 +764,7 @@ This is not a backwards compatible change.
 - Improved mime-compatible JSON handling
 - Proxy fixes
 - Path hack fixes
-- Case-Insensistive Content-Encoding headers
+- Case-Insensitive Content-Encoding headers
 - Support for CJK parameters in form posts
 
 
@@ -438,7 +800,7 @@ This is not a backwards compatible change.
 - Digest Authentication improvements.
 - Ensure proxy exclusions work properly.
 - Clearer UnicodeError exceptions.
-- Automatic casting of URLs to tsrings (fURL and such)
+- Automatic casting of URLs to strings (fURL and such)
 - Bugfixes.
 
 0.13.6 (2012-08-06)
@@ -489,8 +851,8 @@ This is not a backwards compatible change.
 +++++++++++++++++++
 
 - Removal of Requests.async in favor of `grequests <https://github.com/kennethreitz/grequests>`_
-- Allow disabling of cookie persistiance.
-- New implimentation of safe_mode
+- Allow disabling of cookie persistence.
+- New implementation of safe_mode
 - cookies.get now supports default argument
 - Session cookies not saved when Session.request is called with return_response=False
 - Env: no_proxy support.
@@ -607,7 +969,7 @@ This is not a backwards compatible change.
 
 * ``Response.content`` is now bytes-only. (*Backwards Incompatible*)
 * New ``Response.text`` is unicode-only.
-* If no ``Response.encoding`` is specified and ``chardet`` is available, ``Respoonse.text`` will guess an encoding.
+* If no ``Response.encoding`` is specified and ``chardet`` is available, ``Response.text`` will guess an encoding.
 * Default to ISO-8859-1 (Western) encoding for "text" subtypes.
 * Removal of `decode_unicode`. (*Backwards Incompatible*)
 * New multiple-hooks system.
@@ -727,7 +1089,7 @@ This is not a backwards compatible change.
 0.7.5 (2011-11-04)
 ++++++++++++++++++
 
-* Response.content = None if there was an invalid repsonse.
+* Response.content = None if there was an invalid response.
 * Redirection auth handling.
 
 0.7.4 (2011-10-26)
@@ -814,7 +1176,7 @@ This is not a backwards compatible change.
 ++++++++++++++++++
 
 * New callback hook system
-* New persistient sessions object and context manager
+* New persistent sessions object and context manager
 * Transparent Dict-cookie handling
 * Status code reference object
 * Removed Response.cached
@@ -848,7 +1210,7 @@ This is not a backwards compatible change.
 * Redirect Fixes
 * settings.verbose stream writing
 * Querystrings for all methods
-* URLErrors (Connection Refused, Timeout, Invalid URLs) are treated as explicity raised
+* URLErrors (Connection Refused, Timeout, Invalid URLs) are treated as explicitly raised
   ``r.requests.get('hwe://blah'); r.raise_for_status()``
 
 

@@ -1,16 +1,13 @@
 Requests is written and maintained by Kenneth Reitz and
 various contributors:
 
-Development Lead
-````````````````
+Keepers of the Four Crystals
+````````````````````````````
 
-- Kenneth Reitz <me@kennethreitz.org> `@kennethreitz <https://github.com/kennethreitz>`_
-
-Core Contributors
-`````````````````
-
+- Kenneth Reitz <me@kennethreitz.org> `@kennethreitz <https://github.com/kennethreitz>`_, Keeper of the Master Crystal.
 - Cory Benfield <cory@lukasa.co.uk> `@lukasa <https://github.com/lukasa>`_
 - Ian Cordasco <graffatcolmingov@gmail.com> `@sigmavirus24 <https://github.com/sigmavirus24>`_
+- Nate Prewitt <nate.prewitt@gmail.com> `@nateprewitt <https://github.com/nateprewitt>`_
 
 
 
@@ -138,7 +135,7 @@ Patches and Suggestions
 - Kevin Burke <kev@inburke.com>
 - Flavio Curella
 - David Pursehouse <david.pursehouse@gmail.com> (`@dpursehouse <https://github.com/dpursehouse>`_)
-- Jon Parise
+- Jon Parise (`@jparise <https://github.com/jparise>`_)
 - Alexander Karpinsky (`@homm86 <https://twitter.com/homm86>`_)
 - Marc Schlaich (`@schlamar <https://github.com/schlamar>`_)
 - Park Ilsu <daftonshady@gmail.com> (`@daftshady <https://github.com/daftshady>`_)
@@ -159,3 +156,28 @@ Patches and Suggestions
 - Syed Suhail Ahmed <ssuhail.ahmed93@gmail.com> (`@syedsuhail <https://github.com/syedsuhail>`_)
 - Scott Sadler (`@ssadler <https://github.com/ssadler>`_)
 - Arthur Darcet (`@arthurdarcet <https://github.com/arthurdarcet>`_)
+- Ulrich Petri (`@ulope <https://github.com/ulope>`_)
+- Muhammad Yasoob Ullah Khalid <yasoob.khld@gmail.com> (`@yasoob <https://github.com/yasoob>`_)
+- Paul van der Linden (`@pvanderlinden <https://github.com/pvanderlinden>`_)
+- Colin Dickson (`@colindickson <https://github.com/colindickson>`_)
+- Smiley Barry (`@smiley <https://github.com/smiley>`_)
+- Shagun Sodhani (`@shagunsodhani <https://github.com/shagunsodhani>`_)
+- Robin Linderborg (`@vienno <https://github.com/vienno>`_)
+- Brian Samek (`@bsamek <https://github.com/bsamek>`_)
+- Dmitry Dygalo (`@Stranger6667 <https://github.com/Stranger6667>`_)
+- piotrjurkiewicz
+- Jesse Shapiro <jesse@jesseshapiro.net> (`@haikuginger <https://github.com/haikuginger>`_)
+- Nate Prewitt <nate.prewitt@gmail.com> (`@nateprewitt <https://github.com/nateprewitt>`_)
+- Maik Himstedt
+- Michael Hunsinger
+- Brian Bamsch <bbamsch32@gmail.com> (`@bbamsch <https://github.com/bbamsch>`_)
+- Om Prakash Kumar <omprakash070@gmail.com> (`@iamprakashom <https://github.com/iamprakashom>`_)
+- Philipp Konrad <gardiac2002@gmail.com> (`@gardiac2002 <https://github.com/gardiac2002>`_)
+- Hussain Tamboli <hussaintamboli18@gmail.com> (`@hussaintamboli <https://github.com/hussaintamboli>`_)
+- Casey Davidson (`@davidsoncasey <https://github.com/davidsoncasey>`_)
+- Andrii Soldatenko (`@a_soldatenko <https://github.com/andriisoldatenko>`_)
+- Moinuddin Quadri <moin18@gmail.com> (`@moin18 <https://github.com/moin18>`_)
+- Matt Kohl (`@mattkohl <https://github.com/mattkohl>`_)
+- Jonathan Vanasco (`@jvanasco <https://github.com/jvanasco>`_)
+- David Fontenot (`@davidfontenot <https://github.com/davidfontenot>`_)
+- Shmuel Amar (`@shmuelamar <https://github.com/shmuelamar>`_)
