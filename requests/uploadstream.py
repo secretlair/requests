@@ -75,6 +75,9 @@ class UploadStream(object):
 
             self._lowLevelConnection = self._connection._get_conn(timeout=self._timeout.connect_timeout)
             self._lowLevelConnection.timeout = self._timeout.connect_timeout
+            is_new_proxy_conn = self._connection.proxy is not None and not getattr(self._lowLevelConnection, 'sock', None)
+            if is_new_proxy_conn:
+                self._connection._prepare_proxy(self._lowLevelConnection)
             self._lowLevelConnection.putrequest(self._request.method, url, skip_accept_encoding=True)
 
             for header, value in self._request.headers.items():
