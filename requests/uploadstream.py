@@ -126,5 +126,7 @@ class UploadStream(object):
 
     @remap_exception
     def write(self, chunk):
+        if self._lowLevelConnection.sock:
+            self._lowLevelConnection.sock.settimeout(self._timeout.read_timeout)
         self._lowLevelConnection.send(chunk)
 
